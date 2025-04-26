@@ -1,2 +1,2 @@
 # CNMF
-Constrained NonNegative Matrix Factorization
+Constrained NonNegative Matrix Factorization in PyTorch.

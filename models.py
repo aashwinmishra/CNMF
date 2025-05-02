@@ -34,15 +34,29 @@ def _mu_update(param, pos, gamma, l1_reg, l2_reg):
     param.mul_(multiplier)
 
 
+
 class NMFBase(nn.Module):
+  """
+  Base class for all NMF modules. 
+  Args:
+    W_shape: Shape tuple for the W (features/template) tensor
+    H_shape: Shape tuple for the H (weights/activations) tensor
+    n_components: Number of components to be used in the factorization.
+    initial_components: Initial components for the factorization, [1, n_features]
+    fix_components: tuple of booleans, if to allow a component to vary.
+    initial_weights: Initial weights for the factorization, [1, m_examples]
+    fix_weights: tuple of booleans, if to allow a weight to vary.
+    device: device for the computations
+  """
   def __init__(self, 
-               W_shape, 
-               H_shape, 
+               W_shape: tuple, 
+               H_shape: tuple, 
                n_components: int=5, 
                initial_components=None,
                fix_components=(),
                initial_weights=None,
-               fix_weights=()
+               fix_weights=(),
+               device: torch.device=torch.device('cpu')
                ):
     super().__init__()
     self.fix_neg = nn.Threshold(0.0, 1e-8)
@@ -54,7 +68,7 @@ class NMFBase(nn.Module):
     if fix_weights:
       for i in range(len(fix_weights)):
         w_list[i].requires_grad = not fix_weights[i]
-    self.W_list = nn.ParameterList(w_list)
+    self.W_list = nn.ParameterList(w_list).to(device)
     if initial_components is not None:
       h_list = [nn.Parameter(component) for component in initial_components]
     else:
@@ -62,7 +76,7 @@ class NMFBase(nn.Module):
     if fix_components:
       for i in range(len(fix_components)):
         h_list[i].requires_grad = not fix_components[i]
-    self.H_list = nn.ParameterList(h_list)
+    self.H_list = nn.ParameterList(h_list).to(device)
 
   @property
   def H(self):
@@ -190,5 +204,4 @@ class NMF(NMFBase):
       WtWH = W.t() @ WH 
       denominator = WtWH 
     return denominator, W_sum
-
 

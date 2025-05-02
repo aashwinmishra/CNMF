@@ -1,6 +1,7 @@
 import torch 
 import torch.nn as nn
 import torch.nn.functional as F
+from metrics import beta_divergence
 
 
 def _mu_update(param, pos, gamma, l1_reg, l2_reg):
